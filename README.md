@@ -10,12 +10,14 @@ crontab-manager系统是前后端分离的，crontab-frontend使用Vue.js, cront
 ![avatar](https://github.com/kaiyuan-finance/crontab-manager/blob/master/Arch.png)
 
 ### 安装
-1.首先准备一台任务机，就是执行crontab的机器，如果想一键安装就让任务机开放出来一个ssh的用户，用来连接任务机初始化环境。<br />
-2.
+1.首先准备一台任务机，就是执行crontab的机器，如果想一键安装就让任务机开放出来一个可以通过用户名,密码登录的ssh用户，用来连接任务机初始化环境。<br />
+2.创建数据库将Cronjob.sql导入到数据库中即可。<br />
+2.修改crontab-deploy-script/crontab-backend/crontab-backend-conf/.env.dev 文件中DB_*对应的值就行了
 ##### 一键安装：
 ```bash
 ./install.sh 11.11.11.11:9099 11.11.11.22:8088 "devops:123456@11.11.11.33:2222"
 ```
+以上参数皆为示例，用时替换成自己的即可。<br />
 第一个参数是后端接口对外提供访问的地址，端口必填。<br />
 第二个参数是前端页面对外提供访问的地址，端口必填。<br />
 第三个参数是任务机的地址，这个参数的作用主要有2个：1初始化crontab-backend的ansible调用环境，2.初始化任务机crontab的ssh认证环境。<br />
@@ -48,9 +50,10 @@ echo "11.11.11.33 ansible_ssh_user=devops ansible_ssh_port=2222" >> /etc/ansible
 ```bash
 mkdir -p .ssh && chmod 700 .ssh && mkdir -p /opt/kycrond && mkdir -p /opt/kycrond/logs && mkdir -p /opt/kycrond/locks  && chown -R devops: /opt/kycrond
 ```
-然后将id_rsa.pub 拷贝到 .ssh目录里，然后再将start.sh拷贝到/opt/kycrond目录中 <br />
+将crontab-deploy-script/crontab-backend/id_rsa.pub 拷贝到 .ssh目录里<br />
+将crontab-deploy-script/start.sh拷贝到/opt/kycrond目录中 <br />
 记得把start.sh中pushurl="http://11.11.11.11:9099/console/external/loghandle/collect" 的
-ip:port 替换成crontab-backend接口服务，对外提供的访问地址即可。<br />
+ip:port 替换成crontab-backend对外提供的ip:port地址即可。<br />
 然后再执行：<br />
 ```bash
 chmod a+x /opt/kycrond/start.sh && chown devops:devops .ssh && touch .ssh/authorized_keys && chmod 600 .ssh/authorized_keys && cat .ssh/id_rsa.pub >> .ssh/authorized_keys
